@@ -83,7 +83,7 @@ jobs:
       - name: Install Calamares into airootfs
         run: |
           mkdir -p profile/airootfs/usr
-          cp -r /tmp/calamares-install/usr/* profile/airootfs/usr/
+          cp -r /tmp/calamares-install/usr/* airootfs/usr/
 
       - name: Build ISO
         run: bash ./build_iso.sh
@@ -93,4 +93,5 @@ jobs:
         with:
           name: archlinux-custom
           path: out/*.iso
+
 
