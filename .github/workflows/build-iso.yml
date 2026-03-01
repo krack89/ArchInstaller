@@ -12,28 +12,21 @@ jobs:
       image: archlinux:latest
       options: --privileged
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    container:
-      image: archlinux:latest
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Install archiso
-      run: pacman -Sy --noconfirm archiso git
+      - name: Install archiso
+        run: pacman -Sy --noconfirm archiso git
 
-    - name: Fix line endings
-      run: sed -i 's/\r$//' build_iso.sh
+      - name: Fix line endings
+        run: sed -i 's/\r$//' build_iso.sh
 
-    - name: Build ISO
-      run: bash ./build_iso.sh
+      - name: Build ISO
+        run: bash ./build_iso.sh
 
-    - name: Upload ISO
-      uses: actions/upload-artifact@v4
-      with:
-        name: archlinux-custom
-        path: out/*.iso
-
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: archlinux-custom
+          path: out/*.iso
