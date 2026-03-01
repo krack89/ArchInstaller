@@ -1,1 +1,0 @@
-plasma sddm arc-gtk-theme papirus-icon-theme pamac-aur
