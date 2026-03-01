@@ -1,0 +1,11 @@
+import QtQuick 2.0
+
+Rectangle {
+    color: "#1e1e1e"
+    Text {
+        anchors.centerIn: parent
+        text: "Установка Arch Linux с KDE Plasma"
+        color: "white"
+        font.pixelSize: 28
+    }
+}
