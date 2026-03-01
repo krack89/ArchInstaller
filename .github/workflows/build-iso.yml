@@ -1,10 +1,3 @@
-name: Build ISO
-
-on:
-  push:
-    branches: [ "dev" ]
-  workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,24 +9,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # -----------------------------
-      # FIX ARCH MIRRORLIST (NO COMMUNITY)
-      # -----------------------------
       - name: Install new Arch mirrorlist
         run: |
           install -Dm644 mirrorlist-arch /etc/pacman.d/mirrorlist
 
-      # -----------------------------
-      # INIT PACMAN KEYS
-      # -----------------------------
       - name: Initialize pacman keys
         run: |
           pacman-key --init
           pacman-key --populate archlinux
 
-      # -----------------------------
-      # INSTALL CHAOTIC KEYRING MANUALLY
-      # -----------------------------
       - name: Download Chaotic-AUR keyring
         run: |
           curl -LO https://raw.githubusercontent.com/chaotic-aur/chaotic-keyring/master/chaotic.gpg
@@ -44,67 +28,44 @@ jobs:
           install -Dm644 chaotic.gpg /usr/share/pacman/keyrings/chaotic.gpg
           install -Dm644 chaotic-trusted /usr/share/pacman/keyrings/chaotic-trusted
 
-      # -----------------------------
-      # INSTALL STATIC CHAOTIC MIRRORLIST
-      # -----------------------------
       - name: Install static Chaotic-AUR mirrorlist
         run: |
           install -Dm644 chaotic-mirrorlist /etc/pacman.d/chaotic-mirrorlist
 
-      # -----------------------------
-      # ENABLE CHAOTIC-AUR REPO
-      # -----------------------------
       - name: Add Chaotic-AUR repo
         run: |
           echo "" >> /etc/pacman.conf
           echo "[chaotic-aur]" >> /etc/pacman.conf
           echo "Include = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
 
-      # -----------------------------
-      # UPDATE PACMAN
-      # -----------------------------
       - name: Update pacman
         run: pacman -Syy
 
-      # -----------------------------
-      # INSTALL ARCHISO
-      # -----------------------------
       - name: Install archiso
         run: pacman -Sy --noconfirm archiso git
 
-      # -----------------------------
-      # FIX LINE ENDINGS
-      # -----------------------------
       - name: Fix line endings
         run: sed -i 's/\r$//' build_iso.sh
 
-+    - name: Build Calamares
-+      run: |
-+        pacman -Sy --noconfirm cmake extra-cmake-modules git
-+        git clone https://github.com/calamares/calamares.git
-+        cd calamares
-+        mkdir build && cd build
-+        cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DWITH_QT6=OFF -DWITH_QT5=ON
-+        make -j$(nproc)
-+        make DESTDIR=/tmp/calamares-install install
-+
-+    - name: Install Calamares into airootfs
-+      run: |
-+        cp -r /tmp/calamares-install/usr/* /airootfs/usr/
+      - name: Build Calamares
+        run: |
+          pacman -Sy --noconfirm cmake extra-cmake-modules git
+          git clone https://github.com/calamares/calamares.git
+          cd calamares
+          mkdir build && cd build
+          cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DWITH_QT6=OFF -DWITH_QT5=ON
+          make -j$(nproc)
+          make DESTDIR=/tmp/calamares-install install
 
-      # -----------------------------
-      # BUILD ISO
-      # -----------------------------
+      - name: Install Calamares into airootfs
+        run: |
+          cp -r /tmp/calamares-install/usr/* profile/airootfs/usr/
+
       - name: Build ISO
         run: bash ./build_iso.sh
 
-      # -----------------------------
-      # UPLOAD RESULT
-      # -----------------------------
       - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
           name: archlinux-custom
           path: out/*.iso
-
-
