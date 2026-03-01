@@ -1,0 +1,12 @@
+---
+branding:
+  componentName: "archinstaller"
+  strings:
+    productName: "ArchInstaller"
+    shortVersion: "1.0"
+    version: "1.0"
+    welcomeStyleCalamares: true
+  images:
+    productLogo: "logo.png"
+    productIcon: "logo.png"
+  slideshow: "slideshow"
