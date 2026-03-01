@@ -61,19 +61,6 @@ jobs:
 
           pacman -Syy --noconfirm chaotic-keyring chaotic-mirrorlist
 
-      - name: Install Calamares dependencies
-        run: |
-          pacman -S --noconfirm \
-            calamares \
-            calamares-config \
-            qt5-base \
-            qt5-svg \
-            qt5-tools \
-            kpmcore \
-            squashfs-tools \
-            yaml-cpp \
-            boost-libs
-
       - name: Build ISO
         run: |
           mkarchiso -v -w work -o out archiso
@@ -83,3 +70,4 @@ jobs:
         with:
           name: ArchInstaller-ISO
           path: out/*.iso
+
