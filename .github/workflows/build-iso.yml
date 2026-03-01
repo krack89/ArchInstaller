@@ -33,16 +33,27 @@ jobs:
         run: |
           pacman -S --noconfirm archiso
 
-      - name: Initialize pacman keyring (fix for CI)
+      - name: Initialize pacman keyring
         run: |
           pacman-key --init
           pacman-key --populate archlinux
 
-      - name: Add Chaotic-AUR
+      - name: Add Chaotic-AUR keys (ALL required keys)
         run: |
+          # Main Chaotic key
           pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
           pacman-key --lsign-key 3056513887B78AEB
 
+          # Garuda Builder key (signs chaotic-mirrorlist)
+          pacman-key --recv-key 349BC7808577C592 --keyserver keyserver.ubuntu.com
+          pacman-key --lsign-key 349BC7808577C592
+
+          # TNE key (signs chaotic-keyring)
+          pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
+          pacman-key --lsign-key FBA220DFC880C036
+
+      - name: Add Chaotic-AUR repository
+        run: |
           tee -a /etc/pacman.conf << 'EOF'
           [chaotic-aur]
           Server = https://cdn-mirror.chaotic.cx/$repo/$arch
