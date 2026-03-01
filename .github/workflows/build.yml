@@ -21,11 +21,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build ISO
+      - name: Fix line endings and BOM
         run: |
-          cd archiso
-          mkdir -p ../out
-          mkarchiso -v -w ./work -o ../out .
+          sed -i '1s/^\xEF\xBB\xBF//' build_iso.sh
+          sed -i '1s/^\xEF\xBB\xBF//' archiso/profiledef.sh
+          sed -i '1s/^\xEF\xBB\xBF//' archiso/packages.x86_64
+          sed -i '1s/^\xEF\xBB\xBF//' archiso/airootfs/root/customize_airootfs.sh
+          dos2unix build_iso.sh archiso/profiledef.sh archiso/packages.x86_64 archiso/airootfs/root/customize_airootfs.sh || true
+
+      - name: Make build script executable
+        run: chmod +x build_iso.sh
+
+      - name: Build ISO
+        run: ./build_iso.sh
 
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
