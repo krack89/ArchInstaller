@@ -16,17 +16,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # -----------------------------
-      # PACMAN KEYRING INITIALIZATION
-      # -----------------------------
       - name: Initialize pacman keys
         run: |
           pacman-key --init
           pacman-key --populate archlinux
 
       # -----------------------------
-      # INSTALL CHAOTIC-AUR KEYRING MANUALLY
-      # (NO pacman, NO signature checks)
+      # INSTALL CHAOTIC KEYRING MANUALLY
       # -----------------------------
       - name: Download Chaotic-AUR keyring
         run: |
@@ -39,16 +35,22 @@ jobs:
           install -Dm644 chaotic-trusted /usr/share/pacman/keyrings/chaotic-trusted
 
       # -----------------------------
-      # INSTALL CHAOTIC-AUR MIRRORLIST
-      # (REAL CDN, NOT 404)
+      # DOWNLOAD MIRRORLIST WITH USER-AGENT
       # -----------------------------
       - name: Download Chaotic-AUR mirrorlist
         run: |
-          curl -Lo /etc/pacman.d/chaotic-mirrorlist \
+          curl -A "Mozilla/5.0" -Lo /etc/pacman.d/chaotic-mirrorlist \
             https://cdn-mirror.chaotic.cx/mirrorlist.txt
 
+          # Проверка, что mirrorlist настоящий, а не HTML
+          if grep -qi "<html" /etc/pacman.d/chaotic-mirrorlist; then
+            echo "ERROR: mirrorlist.txt is HTML (404 or CDN blocked)"
+            cat /etc/pacman.d/chaotic-mirrorlist
+            exit 1
+          fi
+
       # -----------------------------
-      # ENABLE CHAOTIC-AUR REPOSITORY
+      # ENABLE CHAOTIC-AUR REPO
       # -----------------------------
       - name: Add Chaotic-AUR repo
         run: |
@@ -57,7 +59,7 @@ jobs:
           echo "Include = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
 
       # -----------------------------
-      # UPDATE PACMAN DATABASES
+      # UPDATE PACMAN
       # -----------------------------
       - name: Update pacman
         run: pacman -Syy
