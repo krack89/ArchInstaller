@@ -21,9 +21,7 @@ jobs:
           pacman-key --init
           pacman-key --populate archlinux
 
-      # -----------------------------
-      # INSTALL CHAOTIC KEYRING MANUALLY
-      # -----------------------------
+      # Install Chaotic-AUR keyring manually
       - name: Download Chaotic-AUR keyring
         run: |
           curl -LO https://raw.githubusercontent.com/chaotic-aur/chaotic-keyring/master/chaotic.gpg
@@ -34,57 +32,29 @@ jobs:
           install -Dm644 chaotic.gpg /usr/share/pacman/keyrings/chaotic.gpg
           install -Dm644 chaotic-trusted /usr/share/pacman/keyrings/chaotic-trusted
 
-      # -----------------------------
-      # DOWNLOAD MIRRORLIST WITH USER-AGENT
-      # -----------------------------
-      - name: Download Chaotic-AUR mirrorlist
+      # Use STATIC mirrorlist from repo
+      - name: Install static Chaotic-AUR mirrorlist
         run: |
-          curl -A "Mozilla/5.0" -Lo /etc/pacman.d/chaotic-mirrorlist \
-            https://cdn-mirror.chaotic.cx/mirrorlist.txt
+          install -Dm644 chaotic-mirrorlist /etc/pacman.d/chaotic-mirrorlist
 
-          # Проверка, что mirrorlist настоящий, а не HTML
-          if grep -qi "<html" /etc/pacman.d/chaotic-mirrorlist; then
-            echo "ERROR: mirrorlist.txt is HTML (404 or CDN blocked)"
-            cat /etc/pacman.d/chaotic-mirrorlist
-            exit 1
-          fi
-
-      # -----------------------------
-      # ENABLE CHAOTIC-AUR REPO
-      # -----------------------------
       - name: Add Chaotic-AUR repo
         run: |
           echo "" >> /etc/pacman.conf
           echo "[chaotic-aur]" >> /etc/pacman.conf
           echo "Include = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
 
-      # -----------------------------
-      # UPDATE PACMAN
-      # -----------------------------
       - name: Update pacman
         run: pacman -Syy
 
-      # -----------------------------
-      # INSTALL ARCHISO
-      # -----------------------------
       - name: Install archiso
         run: pacman -Sy --noconfirm archiso git
 
-      # -----------------------------
-      # FIX LINE ENDINGS
-      # -----------------------------
       - name: Fix line endings
         run: sed -i 's/\r$//' build_iso.sh
 
-      # -----------------------------
-      # BUILD ISO
-      # -----------------------------
       - name: Build ISO
         run: bash ./build_iso.sh
 
-      # -----------------------------
-      # UPLOAD RESULT
-      # -----------------------------
       - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
