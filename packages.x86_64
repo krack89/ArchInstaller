@@ -4,6 +4,7 @@ linux-firmware
 mkinitcpio
 systemd
 systemd-sysvcompat
+syslinux
 
 networkmanager
 iwd
