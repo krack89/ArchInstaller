@@ -54,7 +54,7 @@ jobs:
       - name: Fix line endings
         run: sed -i 's/\r$//' build_iso.sh
 
-      - name: Build Calamares
+            - name: Build Calamares
         run: |
           pacman -Sy --noconfirm \
             base-devel \
@@ -65,6 +65,11 @@ jobs:
             qt5-tools \
             qt5-svg \
             qt5-xmlpatterns \
+            qt5-declarative \
+            qt5-quickcontrols \
+            qt5-quickcontrols2 \
+            qt5-graphicaleffects \
+            qt5-webengine \
             boost \
             boost-libs \
             yaml-cpp \
@@ -93,5 +98,6 @@ jobs:
         with:
           name: archlinux-custom
           path: out/*.iso
+
 
 
