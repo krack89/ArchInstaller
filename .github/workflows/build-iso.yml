@@ -1,3 +1,10 @@
+name: Build ISO
+
+on:
+  push:
+    branches: [ "dev" ]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
