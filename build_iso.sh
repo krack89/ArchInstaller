@@ -1,11 +1,26 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-echo "== ArchInstaller v0.0.7 EXTREME++ ISO Builder =="
+PROFILE_DIR="$(pwd)"
+OUT_DIR="$PROFILE_DIR/out"
 
-WORKDIR="./work"
-OUTDIR="./out"
+# Проверка root
+if [[ $EUID -ne 0 ]]; then
+    echo "Ошибка: скрипт нужно запускать от root."
+    exit 1
+fi
 
-mkdir -p "$WORKDIR" "$OUTDIR"
+# Проверка archiso
+if ! command -v mkarchiso &>/dev/null; then
+    echo "Устанавливаю archiso..."
+    pacman -Sy --noconfirm archiso
+fi
 
-mkarchiso -v -w "$WORKDIR" -o "$OUTDIR" archiso
+# Очистка
+rm -rf "$OUT_DIR"
+mkdir -p "$OUT_DIR"
+
+echo "Собираю ISO..."
+mkarchiso -v -w "$OUT_DIR/work" -o "$OUT_DIR" "$PROFILE_DIR"
+
+echo "Готово! ISO находится в $OUT_DIR"
