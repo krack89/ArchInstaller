@@ -21,32 +21,23 @@ jobs:
           pacman-key --init
           pacman-key --populate archlinux
 
-      - name: Import ALL Chaotic-AUR keys
+      - name: Download Chaotic-AUR keyring and mirrorlist manually
         run: |
-          pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
-          pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
-          pacman-key --recv-key 9C02FF419FECBE16 --keyserver keyserver.ubuntu.com
+          curl -LO https://builds.garudalinux.org/repos/chaotic-aur/x86_64/chaotic-keyring-20240202-1-any.pkg.tar.zst
+          curl -LO https://builds.garudalinux.org/repos/chaotic-aur/x86_64/chaotic-mirrorlist-20240202-1-any.pkg.tar.zst
 
-      - name: Locally sign ALL Chaotic-AUR keys
+      - name: Extract keyring and mirrorlist manually
         run: |
-          pacman-key --lsign-key 3056513887B78AEB
-          pacman-key --lsign-key FBA220DFC880C036
-          pacman-key --lsign-key 9C02FF419FECBE16
+          bsdtar -xvf chaotic-keyring-*.pkg.tar.zst -C /
+          bsdtar -xvf chaotic-mirrorlist-*.pkg.tar.zst -C /
 
-      - name: Add temporary Chaotic-AUR server
+      - name: Add Chaotic-AUR repo
         run: |
           echo "" >> /etc/pacman.conf
           echo "[chaotic-aur]" >> /etc/pacman.conf
-          echo "Server = https://cdn-mirror.chaotic.cx/\$repo/\$arch" >> /etc/pacman.conf
+          echo "Include = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
 
-      - name: Install chaotic-keyring and mirrorlist
-        run: pacman -Sy --noconfirm chaotic-keyring chaotic-mirrorlist
-
-      - name: Switch to mirrorlist include
-        run: |
-          sed -i 's|Server = https://cdn-mirror.chaotic.cx/\$repo/\$arch|Include = /etc/pacman.d/chaotic-mirrorlist|' /etc/pacman.conf
-
-      - name: Update pacman databases
+      - name: Update pacman
         run: pacman -Syy
 
       - name: Install archiso
