@@ -59,6 +59,7 @@ jobs:
 
       - name: Install Calamares into airootfs
         run: |
+          mkdir -p profile/airootfs/usr
           cp -r /tmp/calamares-install/usr/* profile/airootfs/usr/
 
       - name: Build ISO
