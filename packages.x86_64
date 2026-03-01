@@ -5,6 +5,8 @@ mkinitcpio
 systemd
 systemd-sysvcompat
 syslinux
+memtest86+
+memtest86+-efi
 
 networkmanager
 iwd
