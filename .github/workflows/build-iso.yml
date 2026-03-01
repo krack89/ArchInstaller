@@ -2,8 +2,15 @@ name: Build ISO
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev" ]
   workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --privileged
 
 jobs:
   build:
@@ -29,3 +36,4 @@ jobs:
       with:
         name: archlinux-custom
         path: out/*.iso
+
