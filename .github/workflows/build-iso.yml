@@ -78,6 +78,21 @@ jobs:
       - name: Fix line endings
         run: sed -i 's/\r$//' build_iso.sh
 
+- name: Build Calamares
+  run: |
+    pacman -Sy --noconfirm cmake extra-cmake-modules git
+    git clone https://github.com/calamares/calamares.git
+    cd calamares
+    mkdir build && cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DWITH_QT6=OFF -DWITH_QT5=ON
+    make -j$(nproc)
+    make DESTDIR=/tmp/calamares-install install
+
+- name: Install Calamares into airootfs
+  run: |
+    mkdir -p airootfs/usr
+    cp -r /tmp/calamares-install/usr/* airootfs/usr/
+
       # -----------------------------
       # BUILD ISO
       # -----------------------------
@@ -92,3 +107,4 @@ jobs:
         with:
           name: archlinux-custom
           path: out/*.iso
+
