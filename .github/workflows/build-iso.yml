@@ -8,22 +8,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Install Arch in container
-      uses: archlinux/archlinux-docker@v1
-      with:
-        run: |
-          pacman -Sy --noconfirm archiso git
+    - name: Install archiso
+      run: pacman -Sy --noconfirm archiso git
 
-          # Линии перевода на всякий
-          sed -i 's/\r$//' build_iso.sh
+    - name: Fix line endings
+      run: sed -i 's/\r$//' build_iso.sh
 
-          chmod +x build_iso.sh
-          ./build_iso.sh
+    - name: Build ISO
+      run: bash ./build_iso.sh
 
     - name: Upload ISO
       uses: actions/upload-artifact@v4
