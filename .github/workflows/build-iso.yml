@@ -16,68 +16,51 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install new Arch mirrorlist
+      - name: Update system
+        run: |
+          pacman -Syu --noconfirm
+
+      - name: Install mirrorlist
         run: |
           install -Dm644 mirrorlist-arch /etc/pacman.d/mirrorlist
 
-      - name: Initialize pacman keys
+      - name: Init pacman keys
         run: |
           pacman-key --init
           pacman-key --populate archlinux
 
-      - name: Download Chaotic-AUR keyring
+      - name: Add Chaotic-AUR keyring
         run: |
-          curl -LO https://raw.githubusercontent.com/chaotic-aur/chaotic-keyring/master/chaotic.gpg
-          curl -LO https://raw.githubusercontent.com/chaotic-aur/chaotic-keyring/master/chaotic-trusted
+          pacman -Sy --noconfirm chaotic-keyring chaotic-mirrorlist
 
-      - name: Install Chaotic-AUR keyring
-        run: |
-          install -Dm644 chaotic.gpg /usr/share/pacman/keyrings/chaotic.gpg
-          install -Dm644 chaotic-trusted /usr/share/pacman/keyrings/chaotic-trusted
-
-      - name: Install static Chaotic-AUR mirrorlist
-        run: |
-          install -Dm644 chaotic-mirrorlist /etc/pacman.d/chaotic-mirrorlist
-
-      - name: Add Chaotic-AUR repo
+      - name: Enable Chaotic-AUR repo
         run: |
           echo "" >> /etc/pacman.conf
           echo "[chaotic-aur]" >> /etc/pacman.conf
           echo "Include = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
 
-      - name: Update pacman
+      - name: Update pacman databases
         run: pacman -Syy
 
-      - name: Install archiso
-        run: pacman -Sy --noconfirm archiso git
+      - name: Install archiso and build deps
+        run: |
+          pacman -S --noconfirm \
+            archiso \
+            git \
+            base-devel \
+            cmake \
+            extra-cmake-modules \
+            qt5-base qt5-tools qt5-svg qt5-xmlpatterns \
+            qt5-declarative qt5-quickcontrols qt5-quickcontrols2 \
+            qt5-graphicaleffects qt5-webengine qt5-webchannel \
+            boost boost-libs yaml-cpp kpmcore polkit-qt5 \
+            libpwquality parted
 
       - name: Fix line endings
         run: sed -i 's/\r$//' build_iso.sh
 
-            - name: Build Calamares
+      - name: Build Calamares
         run: |
-          pacman -Sy --noconfirm \
-            base-devel \
-            cmake \
-            extra-cmake-modules \
-            git \
-            qt5-base \
-            qt5-tools \
-            qt5-svg \
-            qt5-xmlpatterns \
-            qt5-declarative \
-            qt5-quickcontrols \
-            qt5-quickcontrols2 \
-            qt5-graphicaleffects \
-            qt5-webengine \
-            boost \
-            boost-libs \
-            yaml-cpp \
-            kpmcore \
-            polkit-qt5 \
-            libpwquality \
-            parted
-
           git clone https://github.com/calamares/calamares.git
           cd calamares
           mkdir build && cd build
@@ -85,10 +68,10 @@ jobs:
           make -j"$(nproc)"
           make DESTDIR=/tmp/calamares-install install
 
-      - name: Install Calamares into airootfs
+      - name: Install Calamares into ISO root
         run: |
           mkdir -p profile/airootfs/usr
-          cp -r /tmp/calamares-install/usr/* airootfs/usr/
+          cp -r /tmp/calamares-install/usr/* profile/airootfs/usr/
 
       - name: Build ISO
         run: bash ./build_iso.sh
@@ -98,6 +81,3 @@ jobs:
         with:
           name: archlinux-custom
           path: out/*.iso
-
-
-
