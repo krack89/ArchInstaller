@@ -16,26 +16,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Initialize pacman keys
+      - name: Init pacman keys
         run: |
           pacman-key --init
           pacman-key --populate archlinux
 
-      - name: Download Chaotic-AUR keyring and mirrorlist manually
+      - name: Download Chaotic-AUR keyring manually
         run: |
-          curl -LO https://builds.garudalinux.org/repos/chaotic-aur/x86_64/chaotic-keyring-20240202-1-any.pkg.tar.zst
-          curl -LO https://builds.garudalinux.org/repos/chaotic-aur/x86_64/chaotic-mirrorlist-20240202-1-any.pkg.tar.zst
+          curl -LO https://raw.githubusercontent.com/chaotic-aur/chaotic-keyring/master/chaotic.gpg
+          curl -LO https://raw.githubusercontent.com/chaotic-aur/chaotic-keyring/master/chaotic-trusted
 
-      - name: Extract keyring and mirrorlist manually
+      - name: Install Chaotic-AUR keyring manually
         run: |
-          bsdtar -xvf chaotic-keyring-*.pkg.tar.zst -C /
-          bsdtar -xvf chaotic-mirrorlist-*.pkg.tar.zst -C /
+          install -Dm644 chaotic.gpg /usr/share/pacman/keyrings/chaotic.gpg
+          install -Dm644 chaotic-trusted /usr/share/pacman/keyrings/chaotic-trusted
 
       - name: Add Chaotic-AUR repo
         run: |
           echo "" >> /etc/pacman.conf
           echo "[chaotic-aur]" >> /etc/pacman.conf
           echo "Include = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
+
+      - name: Download mirrorlist manually
+        run: |
+          curl -Lo /etc/pacman.d/chaotic-mirrorlist \
+            https://raw.githubusercontent.com/chaotic-aur/chaotic-mirrorlist/master/chaotic-mirrorlist
 
       - name: Update pacman
         run: pacman -Syy
