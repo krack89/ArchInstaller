@@ -1,23 +1,38 @@
-﻿name: Build ArchInstaller ISO
+name: Build ArchInstaller ISO
+
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   workflow_dispatch:
+
 jobs:
-  build:
+  build-iso:
     runs-on: ubuntu-latest
+
+    # Запускаем job внутри контейнера Arch Linux
+    container:
+      image: archlinux:latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Install archiso dependencies
+      - name: Install base tools
         run: |
-          sudo apt update
-          sudo apt install -y archiso git wget xorriso squashfs-tools dosfstools
+          pacman -Sy --noconfirm git base-devel archiso
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Если у тебя профиль archiso лежит в ./archiso
+      # и там есть releng-подобная структура
       - name: Build ISO
         run: |
-          chmod +x build_iso.sh
-          sudo ./build_iso.sh
-      - name: Upload ISO
+          mkdir -p out
+          cd archiso
+          # классическая команда сборки
+          mkarchiso -v -w ./work -o ../out .
+
+      - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ArchInstaller_v0.0.7.iso
+          name: ArchInstaller-ISO
           path: out/*.iso
