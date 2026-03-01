@@ -1,0 +1,7 @@
+---
+locale:
+  region: "ru_RU.UTF-8"
+  zoneinfo: "Asia/Krasnoyarsk"
+  languages:
+    - "ru_RU.UTF-8"
+    - "en_US.UTF-8"
