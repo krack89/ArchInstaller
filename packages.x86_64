@@ -113,3 +113,43 @@ arc-icon-theme
 kvantum
 kvantum-qt5
 papirus-icon-theme
+
++# KDE Plasma
++plasma-desktop
++plasma-wayland-session
++sddm
++konsole
++dolphin
++kate
++ark
++kde-systemsettings
++kde-gtk-config
++kdeplasma-addons
++kio-extras
++plasma-nm
++plasma-pa
++plasma-firewall
++plasma-disks
++plasma-systemmonitor
++
++# Calamares deps
++qt5-base
++qt5-tools
++qt5-svg
++qt5-xmlpatterns
++boost-libs
++boost
++yaml-cpp
++kpmcore
++parted
++polkit-qt5
++libpwquality
++squashfs-tools
++rsync
++
++# Arc-Dark themes
++arc-gtk-theme
++arc-icon-theme
++papirus-icon-theme
++kvantum
++kvantum-qt5
