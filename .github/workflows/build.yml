@@ -1,42 +1,30 @@
-name: Build ArchInstaller ISO
+name: Build ISO
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
-  build-iso:
+  build:
     runs-on: ubuntu-latest
 
-    container:
-      image: archlinux:latest
-
     steps:
-      - name: Install dependencies
-        run: |
-          pacman -Sy --noconfirm archiso git base-devel
+    - uses: actions/checkout@v4
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Install ArchISO
+      run: |
+        sudo pacman -Sy --noconfirm archiso
 
-      - name: Fix line endings and BOM
-        run: |
-          sed -i '1s/^\xEF\xBB\xBF//' build_iso.sh
-          sed -i '1s/^\xEF\xBB\xBF//' archiso/profiledef.sh
-          sed -i '1s/^\xEF\xBB\xBF//' archiso/packages.x86_64
-          sed -i '1s/^\xEF\xBB\xBF//' archiso/airootfs/root/customize_airootfs.sh
-          dos2unix build_iso.sh archiso/profiledef.sh archiso/packages.x86_64 archiso/airootfs/root/customize_airootfs.sh || true
+    - name: Convert line endings
+      run: |
+        sudo sed -i 's/\r$//' build_iso.sh
 
-      - name: Make build script executable
-        run: chmod +x build_iso.sh
+    - name: Build ISO
+      run: sudo ./build_iso.sh
 
-      - name: Build ISO
-        run: ./build_iso.sh
-
-      - name: Upload ISO artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ArchInstaller-ISO
-          path: out/*.iso
+    - name: Upload ISO
+      uses: actions/upload-artifact@v4
+      with:
+        name: archlinux-custom
+        path: out/*.iso
