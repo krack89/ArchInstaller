@@ -1,83 +1,62 @@
-name: Build ISO
+name: Build ArchISO
 
 on:
   push:
-    branches: [ "dev" ]
+  pull_request:
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: archlinux:latest
-      options: --privileged
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Update system
+      - name: Install archiso
         run: |
-          pacman -Syu --noconfirm
+          sudo pacman -Syy --noconfirm archiso
 
-      - name: Install mirrorlist
+      - name: Fix Arch mirrors (avoid geo.mirror.pkgbuild.com)
         run: |
-          install -Dm644 mirrorlist-arch /etc/pacman.d/mirrorlist
+          sudo tee /etc/pacman.d/mirrorlist << 'EOF'
+          Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch
+          Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch
+          Server = https://arch.mirror.constant.com/$repo/os/$arch
+          EOF
+          sudo pacman -Syy --noconfirm
 
-      - name: Init pacman keys
+      - name: Add Chaotic-AUR repository
         run: |
-          pacman-key --init
-          pacman-key --populate archlinux
+          sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
+          sudo pacman-key --lsign-key 3056513887B78AEB
 
-      - name: Add Chaotic-AUR keyring
+          sudo tee -a /etc/pacman.conf << 'EOF'
+          [chaotic-aur]
+          Server = https://cdn-mirror.chaotic.cx/$repo/$arch
+          EOF
+
+          sudo pacman -Syy --noconfirm chaotic-keyring chaotic-mirrorlist
+
+      - name: Install Calamares dependencies
         run: |
-          pacman -Sy --noconfirm chaotic-keyring chaotic-mirrorlist
-
-      - name: Enable Chaotic-AUR repo
-        run: |
-          echo "" >> /etc/pacman.conf
-          echo "[chaotic-aur]" >> /etc/pacman.conf
-          echo "Include = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
-
-      - name: Update pacman databases
-        run: pacman -Syy
-
-      - name: Install archiso and build deps
-        run: |
-          pacman -S --noconfirm \
-            archiso \
-            git \
-            base-devel \
-            cmake \
-            extra-cmake-modules \
-            qt5-base qt5-tools qt5-svg qt5-xmlpatterns \
-            qt5-declarative qt5-quickcontrols qt5-quickcontrols2 \
-            qt5-graphicaleffects qt5-webengine qt5-webchannel \
-            boost boost-libs yaml-cpp kpmcore polkit-qt5 \
-            libpwquality parted
-
-      - name: Fix line endings
-        run: sed -i 's/\r$//' build_iso.sh
-
-      - name: Build Calamares
-        run: |
-          git clone https://github.com/calamares/calamares.git
-          cd calamares
-          mkdir build && cd build
-          cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DWITH_QT6=OFF -DWITH_QT5=ON
-          make -j"$(nproc)"
-          make DESTDIR=/tmp/calamares-install install
-
-      - name: Install Calamares into ISO root
-        run: |
-          mkdir -p profile/airootfs/usr
-          cp -r /tmp/calamares-install/usr/* profile/airootfs/usr/
+          sudo pacman -S --noconfirm \
+            calamares \
+            calamares-config \
+            qt5-base \
+            qt5-svg \
+            qt5-tools \
+            kpmcore \
+            squashfs-tools \
+            yaml-cpp \
+            boost-libs
 
       - name: Build ISO
-        run: bash ./build_iso.sh
+        run: |
+          sudo mkarchiso -v -w work -o out archiso
 
-      - name: Upload ISO
+      - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
         with:
-          name: archlinux-custom
+          name: ArchInstaller-ISO
           path: out/*.iso
