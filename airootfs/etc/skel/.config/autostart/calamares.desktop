@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Install System
+Exec=/usr/local/bin/start-calamares.sh
+Icon=calamares
+Terminal=false
