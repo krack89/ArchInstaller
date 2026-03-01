@@ -1,0 +1,2 @@
+Server = https://cdn-mirror.chaotic.cx/$repo/$arch
+Server = https://mirror.theash.xyz/chaotic-aur/$repo/$arch
