@@ -153,3 +153,13 @@ papirus-icon-theme
 +papirus-icon-theme
 +kvantum
 +kvantum-qt5
+
+calamares
+calamares-config
+kpmcore
+qt5-base
+qt5-svg
+qt5-tools
+yaml-cpp
+boost-libs
+squashfs-tools
