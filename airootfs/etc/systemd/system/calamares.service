@@ -1,0 +1,9 @@
+[Unit]
+Description=Calamares Installer
+
+[Service]
+ExecStart=/usr/bin/calamares
+Restart=no
+
+[Install]
+WantedBy=graphical.target
