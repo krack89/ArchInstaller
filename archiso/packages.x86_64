@@ -163,3 +163,7 @@ qt5-tools
 yaml-cpp
 boost-libs
 squashfs-tools
+
+chaotic-keyring
+chaotic-mirrorlist
+
