@@ -1,0 +1,4 @@
+Server = https://cdn-mirror.chaotic.cx/$repo/$arch
+Server = https://chaotic.tn.dedyn.io/$repo/$arch
+Server = https://chaotic.bangl.de/$repo/$arch
+Server = https://chaotic.dr460nf1r3.org/$repo/$arch
