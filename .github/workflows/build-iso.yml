@@ -56,12 +56,28 @@ jobs:
 
       - name: Build Calamares
         run: |
-          pacman -Sy --noconfirm cmake extra-cmake-modules git
+          pacman -Sy --noconfirm \
+            base-devel \
+            cmake \
+            extra-cmake-modules \
+            git \
+            qt5-base \
+            qt5-tools \
+            qt5-svg \
+            qt5-xmlpatterns \
+            boost \
+            boost-libs \
+            yaml-cpp \
+            kpmcore \
+            polkit-qt5 \
+            libpwquality \
+            parted
+
           git clone https://github.com/calamares/calamares.git
           cd calamares
           mkdir build && cd build
           cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DWITH_QT6=OFF -DWITH_QT5=ON
-          make -j$(nproc)
+          make -j"$(nproc)"
           make DESTDIR=/tmp/calamares-install install
 
       - name: Install Calamares into airootfs
@@ -77,3 +93,4 @@ jobs:
         with:
           name: archlinux-custom
           path: out/*.iso
+
