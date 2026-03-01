@@ -21,15 +21,17 @@ jobs:
           pacman-key --init
           pacman-key --populate archlinux
 
-      - name: Import Chaotic-AUR master keys
+      - name: Import ALL Chaotic-AUR keys
         run: |
           pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
           pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
+          pacman-key --recv-key 9C02FF419FECBE16 --keyserver keyserver.ubuntu.com
 
-      - name: Locally sign Chaotic-AUR keys
+      - name: Locally sign ALL Chaotic-AUR keys
         run: |
           pacman-key --lsign-key 3056513887B78AEB
           pacman-key --lsign-key FBA220DFC880C036
+          pacman-key --lsign-key 9C02FF419FECBE16
 
       - name: Add temporary Chaotic-AUR server
         run: |
