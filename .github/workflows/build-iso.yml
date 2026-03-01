@@ -16,44 +16,73 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Init pacman keys
+      # -----------------------------
+      # PACMAN KEYRING INITIALIZATION
+      # -----------------------------
+      - name: Initialize pacman keys
         run: |
           pacman-key --init
           pacman-key --populate archlinux
 
-      - name: Download Chaotic-AUR keyring manually
+      # -----------------------------
+      # INSTALL CHAOTIC-AUR KEYRING MANUALLY
+      # (NO pacman, NO signature checks)
+      # -----------------------------
+      - name: Download Chaotic-AUR keyring
         run: |
           curl -LO https://raw.githubusercontent.com/chaotic-aur/chaotic-keyring/master/chaotic.gpg
           curl -LO https://raw.githubusercontent.com/chaotic-aur/chaotic-keyring/master/chaotic-trusted
 
-      - name: Install Chaotic-AUR keyring manually
+      - name: Install Chaotic-AUR keyring
         run: |
           install -Dm644 chaotic.gpg /usr/share/pacman/keyrings/chaotic.gpg
           install -Dm644 chaotic-trusted /usr/share/pacman/keyrings/chaotic-trusted
 
+      # -----------------------------
+      # INSTALL CHAOTIC-AUR MIRRORLIST
+      # (REAL CDN, NOT 404)
+      # -----------------------------
+      - name: Download Chaotic-AUR mirrorlist
+        run: |
+          curl -Lo /etc/pacman.d/chaotic-mirrorlist \
+            https://cdn-mirror.chaotic.cx/mirrorlist.txt
+
+      # -----------------------------
+      # ENABLE CHAOTIC-AUR REPOSITORY
+      # -----------------------------
       - name: Add Chaotic-AUR repo
         run: |
           echo "" >> /etc/pacman.conf
           echo "[chaotic-aur]" >> /etc/pacman.conf
           echo "Include = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
 
-      - name: Download mirrorlist manually
-        run: |
-          curl -Lo /etc/pacman.d/chaotic-mirrorlist \
-            https://raw.githubusercontent.com/chaotic-aur/chaotic-mirrorlist/master/chaotic-mirrorlist
-
+      # -----------------------------
+      # UPDATE PACMAN DATABASES
+      # -----------------------------
       - name: Update pacman
         run: pacman -Syy
 
+      # -----------------------------
+      # INSTALL ARCHISO
+      # -----------------------------
       - name: Install archiso
         run: pacman -Sy --noconfirm archiso git
 
+      # -----------------------------
+      # FIX LINE ENDINGS
+      # -----------------------------
       - name: Fix line endings
         run: sed -i 's/\r$//' build_iso.sh
 
+      # -----------------------------
+      # BUILD ISO
+      # -----------------------------
       - name: Build ISO
         run: bash ./build_iso.sh
 
+      # -----------------------------
+      # UPLOAD RESULT
+      # -----------------------------
       - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
