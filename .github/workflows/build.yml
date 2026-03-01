@@ -10,25 +10,21 @@ jobs:
   build-iso:
     runs-on: ubuntu-latest
 
-    # Запускаем job внутри контейнера Arch Linux
     container:
       image: archlinux:latest
 
     steps:
-      - name: Install base tools
+      - name: Install dependencies
         run: |
-          pacman -Sy --noconfirm git base-devel archiso
+          pacman -Sy --noconfirm archiso git base-devel
 
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Если у тебя профиль archiso лежит в ./archiso
-      # и там есть releng-подобная структура
       - name: Build ISO
         run: |
-          mkdir -p out
           cd archiso
-          # классическая команда сборки
+          mkdir -p ../out
           mkarchiso -v -w ./work -o ../out .
 
       - name: Upload ISO artifact
